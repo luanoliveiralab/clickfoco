@@ -885,3 +885,30 @@ img {
         transition: transform 0.3s ease, opacity 0.3s ease;
     }
 }
+
+@media (max-width: 768px) {
+    .lightbox-dots {
+        display: flex;
+        justify-content: center;
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        gap: 8px;
+        z-index: 2000;
+    }
+
+    .lightbox-dots span {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: white;
+        opacity: 0.5;
+        cursor: pointer;
+        transition: opacity 0.3s;
+    }
+
+    .lightbox-dots span.active {
+        opacity: 1;
+    }
+}
