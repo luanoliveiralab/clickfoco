@@ -538,36 +538,35 @@ img {
     -webkit-user-drag: none;
 }
 
+/* LIGHTBOX */
 .lightbox {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-
     background: rgba(0, 0, 0, 0.9);
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     opacity: 0;
     visibility: hidden;
-
-    transition: 0.3s;
-
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    transform: scale(0.95);
     z-index: 2000;
 }
 
 .lightbox.active {
     opacity: 1;
     visibility: visible;
+    transform: scale(1);
 }
 
 .lightbox-img {
     max-width: 90%;
     max-height: 90%;
     border-radius: 10px;
+    transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
 .close {
@@ -879,10 +878,10 @@ img {
         display: none;
     }
 
-    /* Lightbox imagem ocupa quase toda a tela */
     .lightbox-img {
         max-width: 95%;
         max-height: 80%;
         border-radius: 8px;
+        transition: transform 0.3s ease, opacity 0.3s ease;
     }
 }
