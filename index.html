@@ -374,6 +374,9 @@
             const closeBtn = select(".close");
             const prevBtn = select(".prev");
             const nextBtn = select(".next");
+            // BLOQUEIO DE SCROLL
+            const disableScroll = () => document.body.style.overflow = "hidden";
+            const enableScroll = () => document.body.style.overflow = "";
 
             const albums = {
                 animais: ["images/animais1.jpg", "images/animais2.jpg", "images/animais3.jpg"],
@@ -402,6 +405,7 @@
                 };
             };
 
+            // Abrir lightbox
             galleryItems.forEach(item => {
                 item.addEventListener("click", () => {
                     const albumName = item.dataset.album;
@@ -411,8 +415,21 @@
                     currentIndex = Array.from(galleryItems).filter(i => i.dataset.album === albumName).indexOf(item);
 
                     lightbox.classList.add("active");
+                    disableScroll(); // bloqueia scroll
                     showImage();
                 });
+            });
+
+            // Fechar lightbox
+            const closeLightbox = () => {
+                lightbox.classList.remove("active");
+                enableScroll(); // libera scroll
+            };
+
+            closeBtn.addEventListener("click", closeLightbox);
+
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") closeLightbox();
             });
 
             const navigateLightbox = (direction) => {
