@@ -68,7 +68,8 @@
 
                     <div class="social hero-social">
                         <a href="https://wa.me/5511932121323"><i class="fa-brands fa-whatsapp"></i> Whatsapp</a>
-                        <a href="https://www.instagram.com/clickfocofoto"><i class="fa-brands fa-instagram"></i> Instagram</a>
+                        <a href="https://www.instagram.com/clickfocofoto"><i class="fa-brands fa-instagram"></i>
+                            Instagram</a>
                         <a href="#"><i class="fa-brands fa-facebook"></i> Facebook</a>
                     </div>
 
@@ -106,7 +107,7 @@
                 <div class="galeria-grid">
 
                     <figure class="galeria-item" data-album="animais">
-                        <img src="images/animais1.jpg" alt="">
+                        <img src="images/animais1.jpg" loading="lazy" alt="">
                         <figcaption>Gatos</figcaption>
                     </figure>
 
@@ -116,12 +117,12 @@
                     </figure>
 
                     <figure class="galeria-item" data-album="urbano">
-                        <img src="images/urbano1.jpg" alt="">
+                        <img src="images/urbano1.jpg" loading="lazy" alt="">
                         <figcaption>Urbano</figcaption>
                     </figure>
 
                     <figure class="galeria-item" data-album="paisagem">
-                        <img src="images/paisagem1.jpg" alt="">
+                        <img src="images/paisagem1.jpg" loading="lazy" alt="">
                         <figcaption>Paisagens</figcaption>
                     </figure>
 
@@ -370,14 +371,16 @@
             onScroll(); // Inicializa corretamente
 
             /* -----------------------------
-               LIGHTBOX
-            ----------------------------- */
+   LIGHTBOX OTIMIZADO
+----------------------------- */
+
             const lightbox = select("#lightbox");
             const lightboxImg = select("#lightbox-img");
             const closeBtn = select(".close");
             const prevBtn = select(".prev");
             const nextBtn = select(".next");
-            // BLOQUEIO DE SCROLL
+            const lightboxDots = select("#lightbox-dots");
+
             const disableScroll = () => document.body.style.overflow = "hidden";
             const enableScroll = () => document.body.style.overflow = "";
 
@@ -393,90 +396,165 @@
 
             const galleryItems = selectAll(".galeria-item");
 
-            const lightboxDots = select("#lightbox-dots");
+            /* PRELOAD DAS IMAGENS DO ÁLBUM */
+            const preloadAlbum = (album) => {
+                album.forEach(src => {
+                    const img = new Image();
+                    img.src = src;
+                });
+            };
 
-            const updateLightboxDots = () => {
-                lightboxDots.innerHTML = ""; // limpa
-                if (window.innerWidth > 768) return; // só mostra no mobile
+            /* CRIA DOTS APENAS UMA VEZ */
+            const createDots = () => {
+
+                lightboxDots.innerHTML = "";
+
+                if (window.innerWidth > 768) return;
 
                 currentAlbum.forEach((_, i) => {
+
                     const dot = document.createElement("span");
-                    dot.classList.toggle("active", i === currentIndex);
+
+                    if (i === currentIndex) dot.classList.add("active");
+
                     dot.addEventListener("click", () => {
                         currentIndex = i;
-                        showImage();
+                        updateImage();
                     });
+
                     lightboxDots.appendChild(dot);
+
                 });
+
             };
 
-            const showImage = () => {
+            /* ATUALIZA DOT ATIVO */
+            const updateDots = () => {
+
+                if (window.innerWidth > 768) return;
+
+                const dots = lightboxDots.querySelectorAll("span");
+
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle("active", i === currentIndex);
+                });
+
+            };
+
+            /* TROCA DE IMAGEM ULTRA SUAVE */
+            const updateImage = () => {
+
                 if (!currentAlbum.length) return;
 
-                const img = new Image();
-                img.src = currentAlbum[currentIndex];
-                img.onload = () => {
-                    lightboxImg.style.opacity = 0;
+                lightboxImg.style.opacity = 0;
+
+                requestAnimationFrame(() => {
+
                     setTimeout(() => {
-                        lightboxImg.src = img.src;
+
+                        lightboxImg.src = currentAlbum[currentIndex];
                         lightboxImg.style.opacity = 1;
-                        updateLightboxDots(); // ← atualiza os dots sempre que muda a imagem
-                    }, 100);
-                };
+
+                        updateDots();
+
+                    }, 120);
+
+                });
+
             };
 
-            // Abrir lightbox
-            galleryItems.forEach(item => {
-                item.addEventListener("click", () => {
-                    const albumName = item.dataset.album;
-                    currentAlbum = albums[albumName];
+            /* ABRIR LIGHTBOX */
 
-                    // Abre na imagem clicada
-                    currentIndex = Array.from(galleryItems).filter(i => i.dataset.album === albumName).indexOf(item);
+            galleryItems.forEach(item => {
+
+                item.addEventListener("click", () => {
+
+                    const albumName = item.dataset.album;
+
+                    currentAlbum = albums[albumName];
+                    currentIndex = 0;
+
+                    preloadAlbum(currentAlbum);
 
                     lightbox.classList.add("active");
-                    disableScroll(); // bloqueia scroll
-                    showImage();
+
+                    disableScroll();
+
+                    lightboxImg.src = currentAlbum[currentIndex];
+
+                    createDots();
+
                 });
+
             });
 
-            // Fechar lightbox
+            /* FECHAR */
+
             const closeLightbox = () => {
+
                 lightbox.classList.remove("active");
-                enableScroll(); // libera scroll
+
+                enableScroll();
+
             };
 
             closeBtn.addEventListener("click", closeLightbox);
 
             document.addEventListener("keydown", (e) => {
+
                 if (e.key === "Escape") closeLightbox();
+
             });
 
+            /* NAVEGAÇÃO */
+
             const navigateLightbox = (direction) => {
+
                 if (!currentAlbum.length) return;
+
                 currentIndex = (currentIndex + direction + currentAlbum.length) % currentAlbum.length;
-                showImage();
+
+                updateImage();
+
             };
 
             nextBtn.addEventListener("click", () => navigateLightbox(1));
             prevBtn.addEventListener("click", () => navigateLightbox(-1));
-            closeBtn.addEventListener("click", () => lightbox.classList.remove("active"));
 
             document.addEventListener("keydown", (e) => {
+
                 if (e.key === "ArrowRight") navigateLightbox(1);
                 if (e.key === "ArrowLeft") navigateLightbox(-1);
-                if (e.key === "Escape") lightbox.classList.remove("active");
+
             });
 
-            // Swipe para mobile
+            /* SWIPE MOBILE OTIMIZADO */
+
             let startX = 0;
-            lightboxImg.addEventListener("touchstart", (e) => startX = e.touches[0].clientX);
-            lightboxImg.addEventListener("touchmove", (e) => endX = e.touches[0].clientX);
+            let endX = 0;
+
+            lightboxImg.addEventListener("touchstart", (e) => {
+                startX = e.touches[0].clientX;
+            });
+
+            lightboxImg.addEventListener("touchmove", (e) => {
+                endX = e.touches[0].clientX;
+            });
+
             lightboxImg.addEventListener("touchend", () => {
-                let diff = startX - endX;
-                if (diff > 50) navigateLightbox(1);
-                if (diff < -50) navigateLightbox(-1);
-                startX = endX = 0;
+
+                const diff = startX - endX;
+
+                if (Math.abs(diff) > 50) {
+
+                    if (diff > 0) navigateLightbox(1);
+                    else navigateLightbox(-1);
+
+                }
+
+                startX = 0;
+                endX = 0;
+
             });
 
             /* -----------------------------
