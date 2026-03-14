@@ -528,29 +528,44 @@
 
             });
 
-            /* SWIPE MOBILE + TAP OTIMIZADO */
+            /* SWIPE + TAP MOBILE */
 
             let startX = 0;
             let endX = 0;
-            let isSwiping = false;
 
             lightboxImg.addEventListener("touchstart", (e) => {
                 startX = e.touches[0].clientX;
-                isSwiping = false;
             });
 
             lightboxImg.addEventListener("touchmove", (e) => {
                 endX = e.touches[0].clientX;
-                isSwiping = true;
             });
 
-            lightboxImg.addEventListener("touchend", () => {
+            lightboxImg.addEventListener("touchend", (e) => {
 
                 const diff = startX - endX;
 
+                /* SWIPE */
                 if (Math.abs(diff) > 50) {
+
                     if (diff > 0) navigateLightbox(1);
                     else navigateLightbox(-1);
+
+                }
+
+                /* TAP */
+                else {
+
+                    const rect = lightboxImg.getBoundingClientRect();
+                    const touchX = e.changedTouches[0].clientX - rect.left;
+                    const width = rect.width;
+
+                    if (touchX < width / 2) {
+                        navigateLightbox(-1);
+                    } else {
+                        navigateLightbox(1);
+                    }
+
                 }
 
                 startX = 0;
